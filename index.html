@@ -19,7 +19,52 @@
             min-height: 100vh;
             padding: 20px;
         }
+/* Thêm vào phần <style> */
 
+/* Fix cho iOS checkbox */
+input[type="checkbox"] {
+    -webkit-appearance: checkbox;
+    appearance: checkbox;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    margin: 0;
+    vertical-align: middle;
+}
+
+.checkbox-cell {
+    width: 50px;
+    text-align: center;
+    cursor: default !important;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.checkbox-cell input[type="checkbox"] {
+    pointer-events: auto;
+    touch-action: manipulation;
+}
+
+/* Prevent iOS zoom on input focus */
+input, select, textarea {
+    font-size: 16px !important;
+}
+
+/* Better touch targets for iOS */
+th, td {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button, .btn {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* Fix cho drag handle trên mobile */
+.drag-handle {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
         .container {
             max-width: 1600px;
             margin: 0 auto;
@@ -1284,64 +1329,69 @@ function renderProductForm() {
         }
 
         // Hiển thị bảng sản phẩm
-        function renderProductTable(productList = products) {
-            const visibleColumns = columns.filter(col => col.visible);
-            
-            // Render header
-            const header = document.getElementById('productTableHeader');
-            header.innerHTML = `
-                <th class="checkbox-cell">
-                    <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()">
-                </th>
-            ` + visibleColumns.map(col => `
-                <th onclick="sortTable('${col.id}')" data-column-id="${col.id}">
-                    <span class="drag-handle">⋮⋮</span>
-                    ${col.name}
-                    ${sortColumn === col.id ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
-                </th>
-            `).join('') + '<th style="background: #6c757d;">Thao tác</th>';
+        // Hiển thị bảng sản phẩm
+function renderProductTable(productList = products) {
+    const visibleColumns = columns.filter(col => col.visible);
+    
+    // Render header
+    const header = document.getElementById('productTableHeader');
+    header.innerHTML = `
+        <th class="checkbox-cell" style="cursor: default;" onclick="event.stopPropagation();">
+            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" 
+                   style="cursor: pointer; -webkit-appearance: checkbox;">
+        </th>
+    ` + visibleColumns.map(col => `
+        <th data-column-id="${col.id}">
+            <span class="drag-handle" style="cursor: move;">⋮⋮</span>
+            <span onclick="sortTable('${col.id}')" style="cursor: pointer;">
+                ${col.name}
+                ${sortColumn === col.id ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
+            </span>
+        </th>
+    `).join('') + '<th style="background: #6c757d; cursor: default;">Thao tác</th>';
 
-            // Render body
-            const tbody = document.getElementById('productTableBody');
-            if (productList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="${visibleColumns.length + 2}" class="no-data">Không có sản phẩm nào</td></tr>`;
-                return;
-            }
+    // Render body
+    const tbody = document.getElementById('productTableBody');
+    if (productList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${visibleColumns.length + 2}" class="no-data">Không có sản phẩm nào</td></tr>`;
+        return;
+    }
 
-            tbody.innerHTML = productList.map(p => `
-                <tr>
-                    <td class="checkbox-cell">
-                        <input type="checkbox" class="product-checkbox" data-id="${p.id}" 
-                               ${selectedProducts.has(p.id) ? 'checked' : ''} 
-                               onchange="toggleProductSelect(${p.id})">
-                    </td>
-                    ${visibleColumns.map(col => {
-                        let value = p[col.id];
-                        if (col.id === 'id') {
-                            return `<td>SP${String(value).padStart(3, '0')}</td>`;
-                        } else if (col.type === 'image') {
-                            return `<td>${value ? `<img src="${value}" class="product-image" onclick="openImageViewer('${value}')">` : '📦'}</td>`;
-                        } else if (col.type === 'number') {
-                            if (col.id === 'price') {
-                                return `<td>${formatMoney(value || 0)}</td>`;
-                            } else if (col.id === 'stock') {
-                                return `<td style="color: ${value < 10 ? '#dc3545' : '#28a745'}; font-weight: bold;">${value || 0}</td>`;
-                            }
-                            return `<td>${value || 0}</td>`;
-                        } else {
-                            return `<td>${value || '-'}</td>`;
-                        }
-                    }).join('')}
-                    <td>
-                        <button class="btn btn-warning" onclick="editProduct(${p.id})" style="padding: 8px 16px;">✏️</button>
-                        <button class="btn btn-danger" onclick="deleteProduct(${p.id})" style="padding: 8px 16px;">🗑️</button>
-                    </td>
-                </tr>
-            `).join('');
+    tbody.innerHTML = productList.map(p => `
+        <tr>
+            <td class="checkbox-cell" onclick="event.stopPropagation();">
+                <input type="checkbox" class="product-checkbox" data-id="${p.id}" 
+                       ${selectedProducts.has(p.id) ? 'checked' : ''} 
+                       onchange="toggleProductSelect(${p.id})"
+                       style="cursor: pointer; -webkit-appearance: checkbox;">
+            </td>
+            ${visibleColumns.map(col => {
+                let value = p[col.id];
+                if (col.id === 'id') {
+                    return `<td>SP${String(value).padStart(3, '0')}</td>`;
+                } else if (col.type === 'image') {
+                    return `<td>${value ? `<img src="${value}" class="product-image" onclick="openImageViewer('${value}')">` : '📦'}</td>`;
+                } else if (col.type === 'number') {
+                    if (col.id === 'price') {
+                        return `<td>${formatMoney(value || 0)}</td>`;
+                    } else if (col.id === 'stock') {
+                        return `<td style="color: ${value < 10 ? '#dc3545' : '#28a745'}; font-weight: bold;">${value || 0}</td>`;
+                    }
+                    return `<td>${value || 0}</td>`;
+                } else {
+                    return `<td>${value || '-'}</td>`;
+                }
+            }).join('')}
+            <td>
+                <button class="btn btn-warning" onclick="editProduct(${p.id})" style="padding: 8px 16px;">✏️</button>
+                <button class="btn btn-danger" onclick="deleteProduct(${p.id})" style="padding: 8px 16px;">🗑️</button>
+            </td>
+        </tr>
+    `).join('');
 
-            // Initialize SortableJS for column reordering
-            initColumnDragDrop();
-        }
+    // Initialize SortableJS for column reordering
+    initColumnDragDrop();
+}
 
         // Initialize drag and drop for columns
         function initColumnDragDrop() {
