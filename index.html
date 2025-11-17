@@ -21,27 +21,63 @@
         }
 /* Thêm vào phần <style> */
 
-/* Fix cho iOS checkbox */
-input[type="checkbox"] {
-    -webkit-appearance: checkbox;
-    appearance: checkbox;
-    width: 20px;
-    height: 20px;
-    cursor: pointer;
-    margin: 0;
-    vertical-align: middle;
-}
 
 .checkbox-cell {
     width: 50px;
     text-align: center;
-    cursor: default !important;
-    -webkit-tap-highlight-color: transparent;
+    padding: 0 !important;
+    vertical-align: middle;
+}
+
+.checkbox-cell label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 15px 0;
+    margin: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: rgba(102, 126, 234, 0.2);
 }
 
 .checkbox-cell input[type="checkbox"] {
-    pointer-events: auto;
-    touch-action: manipulation;
+    -webkit-appearance: checkbox;
+    appearance: checkbox;
+    width: 22px !important;
+    height: 22px !important;
+    min-width: 22px;
+    min-height: 22px;
+    cursor: pointer;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 2px solid #667eea;
+    border-radius: 4px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+/* Specific iOS fixes */
+@supports (-webkit-touch-callout: none) {
+    .checkbox-cell input[type="checkbox"] {
+        transform: scale(1.3);
+        -webkit-transform: scale(1.3);
+    }
+}
+
+input[type="checkbox"]:disabled {
+    opacity: 1 !important;
+    cursor: pointer !important;
+}
+
+/* Better touch */
+th {
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+th:not(.checkbox-cell) {
+    cursor: default;
 }
 
 /* Prevent iOS zoom on input focus */
@@ -937,21 +973,43 @@ button, .btn {
         }
 
         // Checkbox functions
-        function toggleSelectAll() {
-            const selectAllCheckbox = document.getElementById('selectAllCheckbox');
-            const checkboxes = document.querySelectorAll('.product-checkbox');
-            
-            checkboxes.forEach(cb => {
-                cb.checked = selectAllCheckbox.checked;
-                if (selectAllCheckbox.checked) {
-                    selectedProducts.add(parseInt(cb.dataset.id));
-                } else {
-                    selectedProducts.delete(parseInt(cb.dataset.id));
-                }
-            });
-            
-            updateSelectedCount();
+        // Checkbox functions
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (!selectAllCheckbox) return;
+    
+    const isChecked = selectAllCheckbox.checked;
+    const checkboxes = document.querySelectorAll('.product-checkbox');
+    
+    checkboxes.forEach(cb => {
+        cb.checked = isChecked;
+        const productId = parseInt(cb.dataset.id);
+        if (isChecked) {
+            selectedProducts.add(productId);
+        } else {
+            selectedProducts.delete(productId);
         }
+    });
+    
+    updateSelectedCount();
+}
+
+function toggleProductSelect(productId) {
+    if (selectedProducts.has(productId)) {
+        selectedProducts.delete(productId);
+    } else {
+        selectedProducts.add(productId);
+    }
+    updateSelectedCount();
+    
+    // Update select all checkbox
+    const totalCheckboxes = document.querySelectorAll('.product-checkbox').length;
+    const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.checked = selectedProducts.size === totalCheckboxes;
+        selectAllCheckbox.indeterminate = selectedProducts.size > 0 && selectedProducts.size < totalCheckboxes;
+    }
+}
 
         function toggleProductSelect(productId) {
             if (selectedProducts.has(productId)) {
@@ -1330,20 +1388,23 @@ function renderProductForm() {
 
         // Hiển thị bảng sản phẩm
         // Hiển thị bảng sản phẩm
+// Hiển thị bảng sản phẩm
 function renderProductTable(productList = products) {
     const visibleColumns = columns.filter(col => col.visible);
     
     // Render header
     const header = document.getElementById('productTableHeader');
     header.innerHTML = `
-        <th class="checkbox-cell" style="cursor: default;" onclick="event.stopPropagation();">
-            <input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll()" 
-                   style="cursor: pointer; -webkit-appearance: checkbox;">
+        <th class="checkbox-cell">
+            <label style="cursor: pointer; display: block; width: 100%; height: 100%; padding: 0;">
+                <input type="checkbox" id="selectAllCheckbox" 
+                       style="cursor: pointer; width: 20px; height: 20px; margin: 0;">
+            </label>
         </th>
     ` + visibleColumns.map(col => `
         <th data-column-id="${col.id}">
             <span class="drag-handle" style="cursor: move;">⋮⋮</span>
-            <span onclick="sortTable('${col.id}')" style="cursor: pointer;">
+            <span style="cursor: pointer;">
                 ${col.name}
                 ${sortColumn === col.id ? (sortDirection === 'asc' ? '▲' : '▼') : ''}
             </span>
@@ -1359,11 +1420,12 @@ function renderProductTable(productList = products) {
 
     tbody.innerHTML = productList.map(p => `
         <tr>
-            <td class="checkbox-cell" onclick="event.stopPropagation();">
-                <input type="checkbox" class="product-checkbox" data-id="${p.id}" 
-                       ${selectedProducts.has(p.id) ? 'checked' : ''} 
-                       onchange="toggleProductSelect(${p.id})"
-                       style="cursor: pointer; -webkit-appearance: checkbox;">
+            <td class="checkbox-cell">
+                <label style="cursor: pointer; display: block; width: 100%; height: 100%; padding: 0;">
+                    <input type="checkbox" class="product-checkbox" data-id="${p.id}" 
+                           ${selectedProducts.has(p.id) ? 'checked' : ''}
+                           style="cursor: pointer; width: 18px; height: 18px; margin: 0;">
+                </label>
             </td>
             ${visibleColumns.map(col => {
                 let value = p[col.id];
@@ -1389,8 +1451,34 @@ function renderProductTable(productList = products) {
         </tr>
     `).join('');
 
-    // Initialize SortableJS for column reordering
-    initColumnDragDrop();
+    // Gắn sự kiện sau khi render
+    setTimeout(() => {
+        // Sự kiện cho select all
+        const selectAllCheckbox = document.getElementById('selectAllCheckbox');
+        if (selectAllCheckbox) {
+            selectAllCheckbox.addEventListener('change', toggleSelectAll);
+        }
+
+        // Sự kiện cho từng checkbox
+        document.querySelectorAll('.product-checkbox').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                toggleProductSelect(parseInt(this.dataset.id));
+            });
+        });
+
+        // Sự kiện sort cho header (tránh conflict với checkbox)
+        document.querySelectorAll('#productTableHeader th[data-column-id]').forEach(th => {
+            const span = th.querySelector('span:last-child');
+            if (span) {
+                span.addEventListener('click', function() {
+                    sortTable(th.dataset.columnId);
+                });
+            }
+        });
+
+        // Initialize drag drop
+        initColumnDragDrop();
+    }, 50);
 }
 
         // Initialize drag and drop for columns
