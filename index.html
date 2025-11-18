@@ -28,7 +28,28 @@
             background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             min-height: 100vh;
             padding: 10px;
-        }
+        
+		th[draggable="true"] {
+    cursor: move;
+}
+
+th .drag-handle {
+    cursor: move;
+    padding: 5px;
+    display: inline-block;
+    touch-action: none;
+    user-select: none;
+}
+
+th.dragging {
+    opacity: 0.5;
+    background: #999 !important;
+}
+
+th.drag-over {
+    border-left: 4px solid #ffc107 !important;
+    background: rgba(255, 193, 7, 0.2) !important;
+}
 
         .container {
             max-width: 1600px;
