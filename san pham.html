@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dreamy Store - Thế Giới Cầu Vồng</title>
+    <title>DUC8BIT gian hàng - Thế Giới Cầu Vồng </title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
     <style>
@@ -16,13 +16,17 @@
             margin: 0; font-family: 'Quicksand', sans-serif; color: var(--text); min-height: 100vh;
             background: url('https://img.freepik.com/free-vector/hand-painted-watercolor-pastel-sky-background_23-2148902771.jpg?w=1380&t=st=1709123456~exp=1709124056~hmac=fake_token_example') no-repeat center center fixed; 
             background-size: cover; background-color: #fbc2eb;
+            overflow-y: scroll; 
         }
+        body.no-scroll { overflow: hidden; } 
+
         body::before { content: ''; position: fixed; inset: 0; background: linear-gradient(120deg, rgba(161, 140, 209, 0.2), rgba(251, 194, 235, 0.2)); pointer-events: none; z-index: -1; }
         header { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(15px); padding: 15px 40px; position: sticky; top: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05); border-bottom: 1px solid white; }
         .logo { 
             font-size: 1.8rem; font-weight: 800; background: linear-gradient(to right, var(--primary), var(--secondary));
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
+        .controls { display: flex; gap: 10px; } 
         .controls input, .controls select { background: white; border: 1px solid #eee; padding: 12px 20px; border-radius: 50px; color: #666; outline: none; }
         .container { padding: 40px; max-width: 1400px; margin: auto; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 30px; }
@@ -36,6 +40,7 @@
         .card-cat { font-size: 0.8rem; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; background: white; display: inline-block; padding: 4px 10px; border-radius: 20px; align-self: center; }
         .card-name { font-size: 1.2rem; margin: 10px 0; font-weight: 700; color: #444; }
         .card-price { color: var(--primary); font-weight: 800; font-size: 1.3rem; margin-bottom: 15px; }
+        .card-rating { margin-bottom: 10px; color: #ffd700; } 
         .btn-detail { margin-top: auto; background: linear-gradient(45deg, var(--primary), var(--accent)); border: none; color: white; padding: 12px; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 15px rgba(255, 154, 158, 0.4); transition: 0.3s; }
         .pagination { display: flex; justify-content: center; margin-top: 50px; gap: 10px; }
         .page-btn { background: white; border: none; color: #666; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.05); font-weight: bold; transition: 0.3s; }
@@ -47,60 +52,113 @@
         .close-btn { position: absolute; top: 20px; right: 30px; font-size: 3rem; cursor: pointer; color: var(--primary); transition: 0.3s; }
         .detail-container { max-width: 1200px; margin: 60px auto; padding: 0 30px; display: grid; grid-template-columns: 1fr 2fr; gap: 50px; }
         
-        /* Left: Image & Gallery */
-        .img-gallery-side { position: sticky; top: 60px; height: fit-content; }
-        .main-img { width: 100%; max-height: 500px; object-fit: cover; border-radius: 30px; box-shadow: 0 10px 40px rgba(161, 140, 209, 0.2); border: 5px solid white; cursor: zoom-in; }
-        .gallery { display: flex; gap: 15px; margin-top: 20px; overflow-x: auto; padding: 5px; }
+        /* Left: Image & Gallery - Đã Tối ưu hóa chiều cao bằng Flexbox */
+        .img-gallery-side { 
+            position: sticky; 
+            top: 60px; 
+            display: flex; 
+            flex-direction: column; 
+            max-height: calc(100vh - 120px); /* Giới hạn chiều cao tổng thể */
+            padding-bottom: 20px;
+        }
+        .main-img { 
+            width: 100%; 
+            height: auto; 
+            max-height: calc(100vh - 350px); /* Tối ưu chiều cao ảnh chính */
+            object-fit: contain; 
+            border-radius: 30px; 
+            box-shadow: 0 10px 40px rgba(161, 140, 209, 0.2); 
+            border: 5px solid white; 
+            cursor: zoom-in;
+            flex-shrink: 1; /* Cho phép co lại */
+            min-height: 100px;
+        }
+        .gallery { 
+            display: flex; gap: 15px; margin-top: 20px; overflow-x: auto; padding: 5px; 
+            flex-shrink: 0; /* Gallery không được co lại */
+            margin-bottom: 10px; 
+        }
         .gallery img { width: 80px; height: 80px; object-fit: cover; border-radius: 15px; cursor: pointer; border: 3px solid transparent; transition: 0.3s; background: white; }
         .gallery img.active, .gallery img:hover { border-color: var(--primary); transform: scale(1.1); }
 
-        /* Right: Content Blocks */
-        .rich-content-area { padding-bottom: 50px; }
-        .d-title { font-size: 2.5rem; color: #333; margin-top: 0; }
-        .d-price { font-size: 2.2rem; color: var(--primary); font-weight: 800; margin: 10px 0 30px; }
-        
-        /* Content Block Styles */
-        .content-block-wrapper { margin-bottom: 30px; padding: 20px; border-radius: 20px; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
-        .content-block-wrapper h3 { color: var(--secondary); margin-top: 0; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
-
-        /* Text Block */
-        .content-text p { line-height: 1.8; color: #444; }
-
-        /* Image Block */
-        .content-image img { max-width: 100%; height: auto; border-radius: 15px; margin: 15px 0; box-shadow: 0 5px 20px rgba(0,0,0,0.1); cursor: zoom-in; }
-
-        /* Table Block */
-        .content-table table { width: 100%; border-collapse: collapse; margin: 15px 0; background: #fdf0f6; border-radius: 10px; overflow: hidden; }
-        .content-table td { padding: 12px; border: 1px solid var(--primary); border-color: #ff9a9e30; }
-        .content-table td:first-child { font-weight: 700; width: 35%; color: var(--secondary); }
-
-        /* Link Block */
-        .content-link a { 
-            display: inline-block; background: linear-gradient(45deg, var(--secondary), var(--primary)); color: white; padding: 12px 30px; 
-            border-radius: 50px; text-decoration: none; font-weight: bold; margin-top: 10px; transition: 0.3s;
+        /* Lightbox - Zoom Cực đại */
+        .lightbox { 
+            display: none; 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.95); 
+            z-index: 4000; 
+            justify-content: center; 
+            align-items: center; 
+            cursor: zoom-out;
         }
-        .content-link a:hover { transform: scale(1.05); box-shadow: 0 5px 20px rgba(161, 140, 209, 0.5); }
-        
+        .lightbox img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            width: auto;
+            height: auto;
+            border-radius: 0; 
+            box-shadow: none; 
+            object-fit: contain; 
+            transition: none;
+        }
+
+        /* Hot Frame Style */
+        .card.hot-frame {
+            position: relative;
+            border: 3px solid #ff4500; 
+            box-shadow: 0 0 15px rgba(255, 69, 0, 0.8), 0 0 30px rgba(255, 140, 0, 0.6);
+            animation: fireBorder 1s infinite alternate;
+        }
+        .card.hot-frame .card-body {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.9), rgba(255, 250, 240, 0.9)); 
+        }
+
+        @keyframes fireBorder {
+            from { box-shadow: 0 0 10px rgba(255, 69, 0, 0.6), 0 0 20px rgba(255, 140, 0, 0.4); border-color: #ff4500; }
+            to { box-shadow: 0 0 15px rgba(255, 69, 0, 1), 0 0 30px rgba(255, 140, 0, 0.8); border-color: #ff8c00; }
+        }
+
+        /* Rest of Styles */
+        .buy-area { margin-top: auto; flex-shrink: 0; }
+        .d-rating { text-align: center; color: #ffd700; font-size: 1.5rem; margin-bottom: 15px; }
         .btn-buy {
             display: block; width: 100%; text-align: center;
             background: linear-gradient(to right, var(--primary), var(--accent));
             padding: 18px; border-radius: 50px; color: white; text-decoration: none;
             font-size: 1.3rem; font-weight: 800; box-shadow: 0 10px 25px rgba(255, 154, 158, 0.4);
-            transition: 0.3s; text-transform: uppercase; margin-top: 20px;
+            transition: 0.3s; text-transform: uppercase;
         }
-        .lightbox { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.98); z-index: 3000; justify-content: center; align-items: center; }
-        .lightbox img { max-width: 90%; max-height: 90%; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
-
-        @media(max-width: 992px) { .detail-container { grid-template-columns: 1fr; } .img-gallery-side { position: static; } }
+        .content-block-wrapper { margin-bottom: 30px; padding: 20px; border-radius: 20px; background: white; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .content-block-wrapper h3 { color: var(--secondary); margin-top: 0; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+        .d-price { 
+            font-size: 3rem; 
+            font-weight: 900; 
+            color: #ff6b81; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.1); 
+            margin-bottom: 25px; 
+            text-align: left;
+            padding: 10px 0;
+            border-bottom: 2px solid var(--accent);
+        }
+        @media(max-width: 992px) { .detail-container { grid-template-columns: 1fr; } .img-gallery-side { position: static; max-height: unset; flex-direction: column; } .main-img { max-height: 400px; } }
         .no-product { text-align: center; color: #888; font-size: 1.2rem; padding: 50px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo"><i class="fas fa-cloud"></i> DREAMY CLOUD</div>
+    <div class="logo"><i class="fas fa-cloud"></i> ĐỨC8BIT GIAN HÀNG </div>
     <div class="controls">
         <select id="catFilter" onchange="render(1)"></select>
+        <select id="pageSize" onchange="changePageSize()"></select>
+        <select id="sortControl" onchange="render(1)">
+            <option value="adminSort">Sắp xếp theo Admin</option>
+            <option value="priceAsc">Giá tăng dần</option>
+            <option value="priceDesc">Giá giảm dần</option>
+            <option value="nameAsc">Tên (A-Z)</option>
+            <option value="nameDesc">Tên (Z-A)</option>
+        </select>
         <input type="text" id="search" placeholder="Tìm sản phẩm xinh xắn..." onkeyup="render(1)">
     </div>
 </header>
@@ -116,46 +174,87 @@
         <div class="img-gallery-side">
             <img id="d-img" class="main-img" src="" onclick="openZoom(this.src)">
             <div class="gallery" id="d-gallery"></div>
-            <a id="d-link-main" href="#" target="_blank" class="btn-buy">
-                <i class="fas fa-heart"></i> MUA NGAY
-            </a>
+            
+            <div class="buy-area">
+                <div id="d-rating" class="d-rating"></div>
+                <a id="d-link-main" href="#" target="_blank" class="btn-buy">
+                    <i class="fas fa-heart"></i> MUA NGAY
+                </a>
+            </div>
         </div>
         <div class="rich-content-area">
             <h1 id="d-name" class="d-title"></h1>
             <div id="d-price" class="d-price"></div>
             
-            <div id="d-rich-content">
-                </div>
+            <div id="d-rich-content"></div>
         </div>
     </div>
 </div>
 
-<div class="lightbox" id="lightbox" onclick="this.style.display='none'">
+<div class="lightbox" id="lightbox" onclick="closeZoom()">
     <img id="zoom-img" src="">
 </div>
 
 <script>
-    const PER_PAGE = 40;
-    // ĐƯỜNG DẪN FILE JSON ĐƯỢC CHỈ ĐỊNH
+    // KHÔNG SỬ DỤNG LOCALSTORAGE: Luôn mặc định là 'Tất cả' (100000)
+    const PER_PAGE_OPTIONS = [10, 20, 30, 50, 100000]; 
+    let PER_PAGE = 100000; 
+    
     const JSON_FILE_PATH = 'shop_rich_data.json'; 
 
     let products = []; 
     let categories = [];
+    let currentPage = 1; // Biến lưu trang hiện tại
 
-    // --- FETCH DATA FROM JSON (MỚI) ---
+    // --- HELPER FUNCTIONS ---
+    function renderStars(rating) {
+        const rounded = Math.round(rating);
+        let html = '';
+        for(let i=1; i<=5; i++) {
+            html += `<i class="fas fa-star" style="color:${i <= rounded ? '#ffd700' : '#ddd'};"></i>`;
+        }
+        return html;
+    }
+    
+    function fmtMoney(n) { 
+        if (typeof n === 'string') {
+            const num = parseFloat(n.replace(/[^0-9,-]/g, '').replace(',', '.'));
+            if (!isNaN(num)) return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(num);
+            return n; 
+        }
+        return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n); 
+    }
+
+    // --- LOGIC CHO PAGE SIZE DROPDOWN ---
+    function initPageSizeControl() {
+        const sel = document.getElementById('pageSize');
+        sel.innerHTML = '';
+        PER_PAGE_OPTIONS.forEach(size => {
+            const display = size === 100000 ? 'Tất cả' : size;
+            sel.innerHTML += `<option value="${size}" ${size === PER_PAGE ? 'selected' : ''}>${display} sản phẩm</option>`;
+        });
+    }
+
+    function changePageSize() {
+        const newSize = parseInt(document.getElementById('pageSize').value);
+        PER_PAGE = newSize;
+        render(1); 
+    }
+    
+    // --- FETCH DATA FROM JSON ---
     async function fetchDataAndRender() {
         try {
             const response = await fetch(JSON_FILE_PATH);
             if (!response.ok) {
-                throw new Error(`Không thể tải file JSON: "${JSON_FILE_PATH}". Hãy Export từ trang Admin!`);
+                throw new Error(`Không thể tải file JSON: "${JSON_FILE_PATH}". Vui lòng kiểm tra file và chạy bằng Web Server!`);
             }
             const data = await response.json();
             
-            // Lấy dữ liệu từ JSON, không dùng localStorage
             products = Array.isArray(data.products) ? data.products : [];
             categories = Array.isArray(data.categories) ? data.categories : [];
 
             loadCats(); 
+            initPageSizeControl();
             render(1);
 
         } catch (error) {
@@ -164,18 +263,84 @@
         }
     }
 
-    // --- REST OF LOGIC (Giữ nguyên, nhưng đảm bảo không dùng localStorage) ---
-    
     function loadCats() {
         const sel = document.getElementById('catFilter');
         sel.innerHTML = '<option value="">Tất cả danh mục</option>';
-        categories.forEach(c => sel.innerHTML += `<option value="${c}">${c}</option>`);
+        const uniqueCats = [...new Set(categories.concat(products.map(p => p.category).filter(c => c)))];
+        uniqueCats.forEach(c => sel.innerHTML += `<option value="${c}">${c}</option>`);
     }
 
+    // --- SECONDARY SORT LOGIC (Name, Price) ---
+    function secondarySort(a, b, sortValue) {
+        if (sortValue === 'priceAsc' || sortValue === 'priceDesc') {
+            const priceA = Number(a.price || 0);
+            const priceB = Number(b.price || 0);
+            if (sortValue === 'priceAsc') return priceA - priceB;
+            if (sortValue === 'priceDesc') return priceB - priceA;
+        }
+        
+        if (sortValue === 'nameAsc' || sortValue === 'nameDesc') {
+            const nameA = (a.name || '').toLowerCase();
+            const nameB = (b.name || '').toLowerCase();
+            
+            if (nameA < nameB) return sortValue === 'nameAsc' ? -1 : 1;
+            if (nameA > nameB) return sortValue === 'nameAsc' ? 1 : -1;
+        }
+        
+        return 0; 
+    }
+
+    // --- LOGIC SẮP XẾP SẢN PHẨM ---
+    function sortProducts(arr, sortValue) {
+        arr.sort((a, b) => {
+            const isHotA = a.isHotFrame || false;
+            const isHotB = b.isHotFrame || false;
+
+            // 1. Hot products always before regular products
+            if (isHotA !== isHotB) {
+                return isHotB - isHotA; 
+            }
+
+            // 2. Sorting within the same group:
+            
+            if (isHotA) { // Cả hai đều là Hot Frame
+                // Hot Frame: Luôn sắp xếp theo hotFrameOrder
+                const orderA = a.hotFrameOrder || 999;
+                const orderB = b.hotFrameOrder || 999;
+                if (orderA !== orderB) return orderA - orderB;
+                
+                // Nếu hotFrameOrder bằng nhau, áp dụng sắp xếp phụ nếu được chọn
+                if(sortValue !== 'adminSort') {
+                    const sortResult = secondarySort(a, b, sortValue);
+                    if (sortResult !== 0) return sortResult;
+                }
+                
+            } else { // Cả hai đều là sản phẩm Thường (Regular)
+                
+                if (sortValue === 'adminSort') {
+                    // Sắp xếp theo displayOrder (Thứ tự hiển thị thường)
+                    const orderA = a.displayOrder || 999;
+                    const orderB = b.displayOrder || 999;
+                    if (orderA !== orderB) return orderA - orderB;
+                } else {
+                    // Sắp xếp theo Giá/Tên (BỎ QUA displayOrder)
+                    const sortResult = secondarySort(a, b, sortValue);
+                    if (sortResult !== 0) return sortResult;
+                }
+            }
+            
+            // 3. Fallback to ID for stable sort
+            return (a.id || 0) - (b.id || 0); 
+        });
+        return arr;
+    }
+    
     function render(page = 1) {
+        currentPage = page; // Luu lai trang hien tai
         const grid = document.getElementById('grid');
         const search = document.getElementById('search').value.toLowerCase();
         const cat = document.getElementById('catFilter').value;
+        const sortValue = document.getElementById('sortControl').value; 
 
         let filtered = products.filter(p => 
             p.name && p.name.toLowerCase().includes(search) &&
@@ -188,17 +353,22 @@
             return;
         }
 
-        const totalPages = Math.ceil(filtered.length / PER_PAGE);
-        const start = (page - 1) * PER_PAGE;
-        const items = filtered.slice(start, start + PER_PAGE);
+        // Apply combined sorting
+        filtered = sortProducts(filtered, sortValue);
+
+        const actualPerPage = PER_PAGE === 100000 ? filtered.length : PER_PAGE;
+        const totalPages = Math.ceil(filtered.length / actualPerPage);
+        const start = (page - 1) * actualPerPage;
+        const items = filtered.slice(start, start + actualPerPage);
 
         grid.innerHTML = items.map(p => `
-            <div class="card">
+            <div class="card ${p.isHotFrame ? 'hot-frame' : ''}"> 
                 <span class="card-cat">${p.category || 'Chưa phân loại'}</span>
                 <img src="${p.image || ''}" class="card-img" onclick="showDetail(${p.id})">
                 <div class="card-body">
                     <div class="card-name">${p.name}</div>
                     <div class="card-price">${fmtMoney(p.price)}</div>
+                    <div class="card-rating">${renderStars(p.rating || 5)}</div> 
                     <button class="btn-detail" onclick="showDetail(${p.id})">
                         CHI TIẾT <i class="fas fa-arrow-right"></i>
                     </button>
@@ -212,15 +382,23 @@
         const p = document.getElementById('pagi');
         p.innerHTML = '';
         if(total <= 1) return;
-        for(let i=1; i<=total; i++) {
+        
+        let start = Math.max(1, curr - 2);
+        let end = Math.min(total, curr + 2);
+        
+        if (curr <= 3) end = Math.min(total, 5);
+        if (curr >= total - 2) start = Math.max(1, total - 4);
+
+        if (start > 1) p.innerHTML += `<button onclick="render(1)">1...</button>`;
+
+        for(let i=start; i<=end; i++) {
             p.innerHTML += `<button class="page-btn ${i===curr?'active':''}" onclick="render(${i})">${i}</button>`;
         }
+
+        if (end < total) p.innerHTML += `<button onclick="render(${total})">...${total}</button>`;
     }
     
-    function fmtMoney(n) { return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n); }
-    
     function renderContentBlocks(contentArray) {
-        // Logic giữ nguyên
         const targetDiv = document.getElementById('d-rich-content');
         targetDiv.innerHTML = '';
         if (!contentArray || contentArray.length === 0) {
@@ -238,9 +416,9 @@
             } else if (block.type === 'link') {
                 htmlContent = `<div class="content-link"><h3><i class="fas fa-external-link-alt"></i> Liên kết hữu ích</h3><a href="${block.data.url || '#'}" target="_blank">${block.data.text || block.data.url || 'Xem chi tiết'}</a></div>`;
             } else if (block.type === 'table') {
-                let tableHtml = '<table>';
+                let tableHtml = '<table style="width: 100%; border-collapse: collapse;">';
                 (block.data.rows || []).forEach(row => {
-                    tableHtml += `<tr><td>${row.key || ''}</td><td>${row.value || ''}</td></tr>`;
+                    tableHtml += `<tr><td style="padding: 8px; border: 1px solid #eee; font-weight: 700; width: 30%;">${row.key || ''}</td><td style="padding: 8px; border: 1px solid #eee;">${row.value || ''}</td></tr>`;
                 });
                 tableHtml += '</table>';
                 htmlContent = `<div class="content-table"><h3><i class="fas fa-list-ul"></i> Thông số/Đặc điểm</h3>${tableHtml}</div>`;
@@ -258,6 +436,7 @@
         document.getElementById('d-price').innerText = fmtMoney(p.price);
         document.getElementById('d-link-main').href = p.link || "#";
         document.getElementById('d-img').src = p.image || '';
+        document.getElementById('d-rating').innerHTML = renderStars(p.rating || 5);
 
         renderContentBlocks(p.detailedContent); 
 
@@ -270,18 +449,32 @@
         }
 
         document.getElementById('detailPage').classList.add('open');
-        document.body.style.overflow = 'hidden';
+        document.body.classList.add('no-scroll'); 
     }
 
-    function closeDetail() { document.getElementById('detailPage').classList.remove('open'); document.body.style.overflow = 'auto'; }
+    function closeDetail() { 
+        document.getElementById('detailPage').classList.remove('open'); 
+        document.body.classList.remove('no-scroll'); 
+    }
+    
     function switchImg(src, el) {
         document.getElementById('d-img').src = src;
         document.querySelectorAll('.gallery img').forEach(i => i.classList.remove('active'));
         el.classList.add('active');
     }
+
+    // --- LOGIC ZOOM ẢNH CỰC ĐẠI ---
     function openZoom(src) {
         document.getElementById('zoom-img').src = src;
         document.getElementById('lightbox').style.display = 'flex';
+        document.body.classList.add('no-scroll'); 
+    }
+    
+    function closeZoom() {
+        document.getElementById('lightbox').style.display = 'none';
+        if (!document.getElementById('detailPage').classList.contains('open')) {
+            document.body.classList.remove('no-scroll'); 
+        }
     }
     
     // Bắt đầu tải dữ liệu
